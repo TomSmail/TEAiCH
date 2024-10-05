@@ -2,10 +2,11 @@ import cv2
 from mistralai import Mistral
 import time
 import os 
-import base64
 from dotenv import load_dotenv
 from datetime import datetime
 import json
+
+from utils import encode_image
 
 # Load environment variables from .env file
 load_dotenv()
@@ -24,18 +25,6 @@ api_key = os.environ["MISTRAL_API_KEY"]
 print(f"API Key {api_key}")
 client = Mistral(api_key=api_key)
 model = "pixtral-12b-2409"
-
-def encode_image(image_path):
-    """Encode the image to base64."""
-    try:
-        with open(image_path, "rb") as image_file:
-            return base64.b64encode(image_file.read()).decode('utf-8')
-    except FileNotFoundError:
-        print(f"Error: The file {image_path} was not found.")
-        return None
-    except Exception as e:  # Added general exception handling
-        print(f"Error: {e}")
-        return None
     
 
 while True:
