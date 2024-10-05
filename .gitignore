@@ -5,3 +5,4 @@
 *__pycache__*
 /slides
 presentation*
+.DS_Store
