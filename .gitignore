@@ -2,3 +2,6 @@
 /logs
 /images
 .env
+*__pycache__*
+/slides
+presentation*
