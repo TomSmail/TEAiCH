@@ -5,6 +5,7 @@ from pdf2image import convert_from_path
 import os
 import keyboard
 from dotenv import load_dotenv
+import json
 
 # Import the encode_image function from the utils.py file
 from utils import encode_image
@@ -22,7 +23,7 @@ class Slides:
         api_key = os.environ["MISTRAL_API_KEY"]
         self.client = Mistral(api_key=api_key)
         self.model = "pixtral-12b-2409"
-        self.log_file = open('./logs/slide_log_file.txt', 'a')
+        self.log_file = open('./logs/slide_log_file.txt', 'w')
 
     # Convert the slides to images and store them in the slides folder
     def convert_slide_to_images(self):
@@ -67,8 +68,10 @@ class Slides:
                     "type": "text",
                     "text": 
                     """
-                        Please provide a description of the slide, tell me what is being discussed in the slide. 
+                        Please provide a description of the slide, tell me what is being discussed in the slide.
                         Eg. For a slide depicting AI in healthcare -> "Importance of AI in healthcare."
+                        I want the summary to be brief and to not use line breaks, bullet points or lists. 
+
                     """
                 },
                 {
@@ -88,12 +91,27 @@ class Slides:
         return chat_response.choices[0].message.content
     
     def log_presentation_description(self):
+        descriptions = []
         for (time, slide_num)  in self.slide_history:
-            description = self.get_slide_description(slide_num)
-            print(description)
-            # Log the predictions
-            self.log_file.write(f"Slide Number: {slide_num}, Time: {time}, Description: {description}\n")
-            self.log_file.flush()
+            try: 
+                description = self.get_slide_description(slide_num)
+                print(description)
+                # Log the predictions
+                log_entry = {
+                    "slide_number": slide_num,
+                    "time": time,
+                    "description": description
+                }
+            except Exception as e:
+                print(f"Error: {e}")
+                log_entry = {
+                    "slide_number": slide_num,
+                    "time": time,
+                    "description": ""
+                }
+            descriptions.append(log_entry)
+        self.log_file.write(json.dumps(descriptions, indent=4))
+        self.log_file.flush()
 
 if __name__ == "__main__":
     our_slides = Slides("presentation.pdf")
